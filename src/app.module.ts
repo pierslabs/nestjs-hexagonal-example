@@ -4,6 +4,6 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/presentation/users.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(), PostgreDBConf(), UsersModule],
+  imports: [ConfigModule.forRoot(), PostgreDBConf(), UsersModule.forRoot()],
 })
 export class AppModule {}

@@ -1,11 +1,16 @@
-import { Controller, Post } from '@nestjs/common';
+import { Body, Controller, Inject, Post } from '@nestjs/common';
+import { UserUseCasePresenterPort } from '../presenters';
+import { CreateUserUseCaseRequest } from '../use-cases/create-user';
 
 @Controller('users')
 export class UsersController {
-  constructor() {}
+  constructor(
+    @Inject(UserUseCasePresenterPort)
+    private readonly adapter: UserUseCasePresenterPort,
+  ) {}
 
   @Post()
-  create() {
-    throw new Error('Method not implemented.');
+  create(@Body() user: CreateUserUseCaseRequest) {
+    return this.adapter.createUser(user);
   }
 }
