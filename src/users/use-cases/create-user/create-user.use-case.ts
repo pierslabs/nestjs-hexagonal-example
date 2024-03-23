@@ -1,6 +1,11 @@
 import { UseCase } from 'src/common/use-case';
 import { CreateUserRequiredRequestError } from '../errors';
 import { Logger } from '@nestjs/common';
+import { UserEntityRepositoryPort } from 'src/domain/entities/user/user-entity.repository.port';
+
+export type CreateUserRepositoryPort = Pick<UserEntityRepositoryPort, 'save'>;
+
+export const CreateUserRepositoryPort = Symbol('CreateUserRepositoryPort');
 
 export interface CreateUserUseCaseRequest {
   name: string;
@@ -25,15 +30,18 @@ export abstract class CreateUserUseCase
 export class DefaultCreateUserUseCase implements CreateUserUseCase {
   logger: Logger = new Logger('DefaultCreateUserUseCase');
 
-  execute(
+  constructor(private readonly repository: CreateUserRepositoryPort) {}
+
+  async execute(
     request: CreateUserUseCaseRequest,
   ): Promise<CreateUserUseCaseResponse> {
     try {
-      return Promise.resolve({
-        id: '1',
-        name: request.name,
-        email: request.email,
-      });
+      const user = await this.repository.save(request);
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      };
     } catch (error) {
       this.logger.error(error);
       throw new CreateUserRequiredRequestError(error);

@@ -6,9 +6,19 @@ import {
   CreateUserUseCase,
   DefaultCreateUserUseCase,
 } from '../use-cases/create-user';
+import { UserEntityRepositoryPort } from 'src/domain/entities/user/user-entity.repository.port';
+import { UserEntity } from 'src/domain/entities/user/user.entity';
+import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
 
 @Module({
+  imports: [TypeOrmModule.forFeature([UserEntity])],
   controllers: [UsersController],
+  providers: [
+    {
+      provide: UserEntityRepositoryPort,
+      useExisting: getRepositoryToken(UserEntity),
+    },
+  ],
 })
 export class UsersModule {
   static forRoot() {
@@ -21,7 +31,9 @@ export class UsersModule {
         },
         {
           provide: CreateUserUseCase,
-          useFactory: () => new DefaultCreateUserUseCase(),
+          useFactory: (repository: UserEntityRepositoryPort) =>
+            new DefaultCreateUserUseCase(repository),
+          inject: [UserEntityRepositoryPort],
         },
         {
           provide: UserUseCasePresenterAdapter,
